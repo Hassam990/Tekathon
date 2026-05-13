@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Techathon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none;
+        }
+
+        body {
+            background-color: #080808;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Cursor */
+        .custom-cursor {
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 30px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 200;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .nav-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: right;
+        }
+
+        .nav-item {
+            font-size: 0.9rem;
+            font-weight: 300;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .nav-item:hover {
+            opacity: 1;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .orb-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10; /* Behind cards */
+            pointer-events: none;
+        }
+
+        .orb {
+            width: 700px;
+            height: 700px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffffff 0%, transparent 40%),
+                        radial-gradient(circle at 70% 30%, #eab308 0%, transparent 40%),
+                        radial-gradient(circle at 30% 70%, #3b82f6 0%, transparent 40%),
+                        radial-gradient(circle at 70% 70%, #a855f7 0%, transparent 40%),
+                        #8b5cf6;
+            animation: rotateOrb 20s linear infinite, liquidBlob 12s ease-in-out infinite;
+            position: relative;
+            filter: blur(20px); /* Even softer */
+            box-shadow: 0 0 100px 30px rgba(139, 92, 246, 0.2);
+            opacity: 0.8;
+        }
+
+        @keyframes liquidBlob {
+            0%, 100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
+            33% { border-radius: 40% 60% 45% 55% / 55% 45% 60% 40%; }
+            66% { border-radius: 55% 45% 60% 40% / 40% 60% 45% 55%; }
+        }
+
+        @keyframes rotateOrb {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 60px 20px rgba(139, 92, 246, 0.4),
+                    0 0 100px 40px rgba(249, 115, 22, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 70px 25px rgba(139, 92, 246, 0.5),
+                    0 0 110px 50px rgba(249, 115, 22, 0.3);
+            }
+        }
+
+        .hero-text-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 150;
+            pointer-events: none;
+        }
+
+        .text-part {
+            position: absolute;
+            font-size: 7rem;
+            font-weight: 200;
+            letter-spacing: -3px;
+            text-transform: uppercase;
+        }
+
+        .text-a-different {
+            top: 20%;
+            left: 8%;
+        }
+
+        .text-creative {
+            top: 45%;
+            right: 8%;
+            text-align: right;
+        }
+
+        .text-approach {
+            bottom: 15%;
+            left: 8%;
+        }
+
+        /* Scroll Section */
+        .scroll-section {
+            min-height: 500vh;
+            position: relative;
+            z-index: 20; /* Above ball */
+        }
+
+        .intermediate-text-container {
+            position: absolute;
+            top: 50vh;
+            left: 10%;
+            width: 40%;
+            opacity: 0;
+            transform: translateY(50px);
+            z-index: 30;
+        }
+
+        .intermediate-text {
+            font-size: 5rem;
+            font-weight: 200;
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+
+        .cards-container {
+            position: relative;
+            margin-left: auto;
+            width: 80%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 250vh 50px 100vh 50px; /* Increased top padding significantly for more space */
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 0;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                        0 0 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .card-thumbnail {
+            width: 100%;
+            height: 350px;
+            background: rgba(30, 30, 30, 0.8);
+            background-size: cover;
+            background-position: center;
+            transition: all 0.5s ease;
+        }
+
+        .card:hover .card-thumbnail {
+            filter: brightness(1.2);
+            transform: scale(1.05);
+        }
+
+        .card-info {
+            padding: 30px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .card-tag {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Awards Section */
+        .awards-section {
+            padding: 150px 8%;
+            z-index: 20;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center the list */
+            justify-content: center;
+            min-height: 80vh;
+        }
+        .award-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px 0;
+            font-size: 3.5rem;
+            font-weight: 200;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between; /* Text Left, Arrow Right */
+            align-items: center;
+            width: 100%;
+            max-width: 1100px; /* Centered container for alignment */
+            margin: 0 auto;
+        }
+        .award-arrow {
+            width: 35px;
+            height: 35px;
+            transition: transform 0.4s ease;
+            opacity: 0.4;
+        }
+        .award-item:first-child {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .award-item:hover {
+            color: #a855f7;
+            padding-left: 30px;
+        }
+        .award-item:hover .award-arrow {
+            transform: translate(10px, -10px);
+            opacity: 1;
+            color: #a855f7;
+        }
+
+        /* Trusted Section */
+        .trusted-section {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 100px 50px;
+            position: relative;
+            z-index: 20;
+        }
+
+        .trusted-title {
+            font-size: 0.9rem;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0.5;
+            margin-bottom: 80px;
+        }
+
+        .logos-container {
+            display: flex;
+            flex-wrap: wrap; 
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .logo-item {
+            height: 45px;
+            opacity: 1;
+            transition: all 0.3s ease;
+            filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255,255,255,0.2)); /* Added slight glow */
+        }
+
+        .logo-item:hover {
+            transform: scale(1.1);
+            opacity: 0.7;
+        }
+
+        /* Final Section with Plus Icon */
+        .final-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 50px;
+        }
+
+        .plus-icon {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 40px;
+            transform: rotate(45deg);
+        }
+
+        .plus-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .final-text-content {
+            text-align: center;
+        }
+
+        .final-main-text {
+            font-size: 4rem;
+            font-weight: 200;
+            line-height: 1.2;
+            margin-bottom: 30px;
+        }
+
+        .final-sub-text {
+            font-size: 1.25rem;
+            font-weight: 300;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Plus overlay for final animation */
+        .plus-overlay {
+          position: fixed;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #ff6600; /* Start solid orange */
+          z-index: 2000;
+          opacity: 0;
+          pointer-events: none;
+          transition: background-color 0.5s ease;
+        }
+        .plus-overlay svg {
+          width: 200px;
+          height: 200px;
+        }
+        .plus-overlay .overlay-text {
+          position: absolute;
+          color: white;
+          font-family: 'Inter', sans-serif;
+          font-size: 2rem;
+          text-align: center;
+          max-width: 80%;
+        }
+
+        .small-plus {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="cursor"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">Techathon</div>
+        <nav class="nav-stack">
+            <div class="nav-item">Home</div>
+            <div class="nav-item">Work</div>
+            <div class="nav-item">About</div>
+            <div class="nav-item">Contact</div>
+        </nav>
+    </header>
+
+    <!-- Orb (Fixed) -->
+    <div class="orb-container" id="orbContainer">
+        <div class="orb" id="orb"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-text-container">
+            <div class="text-part text-a-different" id="textADifferent">
+                <span id="letterA">A</span> Different
+            </div>
+            <div class="text-part text-creative" id="textCreative">
+                <span id="letterC">C</span>reative
+            </div>
+            <div class="text-part text-approach" id="textApproach">
+                Approach
+            </div>
+        </div>
+    </section>
+
+    <!-- Scroll Section -->
+    <section class="scroll-section" id="scrollSection">
+        <div class="intermediate-text-container" id="intermediateText">
+            <h2 class="intermediate-text">
+                EMOTION INNOVATION<br>
+                WE PUSH THE<br>
+                BOUNDARIES
+            </h2>
+        </div>
+        <div class="cards-container" id="cardsContainer">
+            <div class="card">
+                <div class="card-thumbnail"
+                    style="background-image: url('assets/casestudies/case-study-aether1.webp');"></div>
+                <div class="card-info">
+                    <h3 class="card-title">Aether</h3>
+                    <p class="card-tag">Branding / Digital</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-thumbnail" style="background-image: url('assets/casestudies/case-study-bella.webp');"></div>
+                <div class="card-info">
+                    <h3 class="card-title">Bella</h3>
+                    <p class="card-tag">Product Design</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-thumbnail" style="background-image: url('assets/casestudies/case-study-cmcc.jpg');"></div>
+                <div class="card-info">
+                    <h3 class="card-title">CMCC</h3>
+                    <p class="card-tag">Web Experience</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-thumbnail" style="background-image: url('assets/casestudies/case-study-jasper.webp');"></div>
+                <div class="card-info">
+                    <h3 class="card-title">Jasper AI</h3>
+                    <p class="card-tag">AI Integration</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-thumbnail" style="background-image: url('assets/casestudies/case-study-lando.jpg');"></div>
+                <div class="card-info">
+                    <h3 class="card-title">Lando</h3>
+                    <p class="card-tag">Campaign</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-thumbnail" style="background-image: url('assets/casestudies/case-study-uplink.webp');"></div>
+                <div class="card-info">
+                    <h3 class="card-title">Uplink</h3>
+                    <p class="card-tag">Development</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Awards Section -->
+    <section class="awards-section">
+        <div class="award-item">
+            <span>CSS Awards</span>
+            <svg class="award-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div class="award-item">
+            <span>FWA</span>
+            <svg class="award-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div class="award-item">
+            <span>CSS Design Awards</span>
+            <svg class="award-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div class="award-item">
+            <span>Orpretron</span>
+            <svg class="award-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Trusted Section -->
+    <section class="trusted-section" id="trustedSection">
+        <div class="trusted-title">Trusted by Industry Leaders</div>
+        <div class="logos-container" id="logosContainer">
+            <img src="assets/trusted-section/microsoft-logo.svg" alt="Microsoft" class="logo-item">
+            <img src="assets/trusted-section/salesforce-logo.svg" alt="Salesforce" class="logo-item">
+            <img src="assets/trusted-section/pwc-logo.svg" alt="PwC" class="logo-item">
+            <img src="assets/trusted-section/slack-logo.svg" alt="Slack" class="logo-item">
+            <img src="assets/trusted-section/webflow-logo.svg" alt="Webflow" class="logo-item">
+            <img src="assets/trusted-section/frontify-logo.svg" alt="Frontify" class="logo-item">
+            <img src="assets/trusted-section/jasper.ai-logo.svg" alt="Jasper AI" class="logo-item">
+            <img src="assets/trusted-section/aptos-labs-logo.svg" alt="Aptos Labs" class="logo-item">
+            <img src="assets/trusted-section/bella-kitchenware-logo.svg" alt="Bella Kitchenware" class="logo-item">
+            <img src="assets/trusted-section/lando-norris-logo.svg" alt="Lando Norris" class="logo-item">
+            <img src="assets/trusted-section/steven-bartlett-logo.svg" alt="Steven Bartlett" class="logo-item">
+            <img src="assets/trusted-section/trevor-noah-logo.svg" alt="Trevor Noah" class="logo-item">
+        </div>
+    </section>
+
+    <!-- Final Section with Plus Icon -->
+    <section class="final-section" id="finalSection">
+        <div class="plus-icon" id="plusIcon">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="50" y1="10" x2="50" y2="90" stroke="url(#gradient1)" stroke-width="4"
+                    stroke-linecap="round" />
+                <line x1="10" y1="50" x2="90" y2="50" stroke="url(#gradient1)" stroke-width="4"
+                    stroke-linecap="round" />
+                <defs>
+                    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ff6600" />
+                        <stop offset="100%" stop-color="#111111" />
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+        <div class="final-text-content">
+            <div class="final-main-text">
+                WHERE DIFFERED IS THE STANDARD
+            </div>
+            <div class="final-sub-text">
+                Let's create something extraordinary
+            </div>
+        </div>
+    </section>
+<div class="plus-overlay" id="plusOverlay">
+  <svg viewBox="0 0 162 162" fill="none" xmlns="http://www.w3.org/2000/svg" id="overlaySvg">
+    <path d="M108 88.7c-10.8 0-19.7 8.8-19.7 19.7v47.4c0 1.9-1.5 3.4-3.4 3.4h-8.6c-1.9 0-3.4-1.5-3.4-3.4v-47.4c0-10.8-8.8-19.7-19.7-19.7H6.4c-1.9 0-3.4-1.5-3.4-3.4v-8c0-1.9 1.5-3.4 3.4-3.4h46.9c10.8 0 19.7-8.8 19.6-19.7V6.4c0-1.9 1.5-3.4 3.4-3.4H85c1.9 0 3.4 1.5 3.4 3.4v47.8c0 10.8 8.8 19.7 19.7 19.7h46.6c1.9 0 3.4 1.5 3.4 3.4v8c0 1.9-1.5 3.4-3.4 3.4H108z" fill="url(#gradientOverlay)" />
+    <defs>
+      <linearGradient id="gradientOverlay" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#ff6600"/>
+        <stop offset="100%" stop-color="#111111"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  <div class="overlay-text">WHERE DIFFERED IS THE STANDARD</div>
+</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Custom Cursor
+        const cursor = document.getElementById('cursor');
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            const lerp = 0.12;
+            cursorX += (mouseX - cursorX) * lerp;
+            cursorY += (mouseY - cursorY) * lerp;
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            
+            // Interactive orb follow and "Blob on Hover" effect
+            const orbRect = orb.getBoundingClientRect();
+            const orbCenterX = orbRect.left + orbRect.width / 2;
+            const orbCenterY = orbRect.top + orbRect.height / 2;
+            const dist = Math.hypot(mouseX - orbCenterX, mouseY - orbCenterY);
+            
+            // Proximity thresholds
+            const activeDist = 400;
+            const isNear = dist < activeDist;
+            const intensity = isNear ? (1 - dist / activeDist) : 0;
+
+            const orbMoveX = (mouseX - window.innerWidth / 2) * 0.04;
+            const orbMoveY = (mouseY - window.innerHeight / 2) * 0.04;
+            
+            gsap.to('#orb', {
+                x: orbMoveX,
+                y: orbMoveY,
+                filter: `blur(${20 - intensity * 18}px)`, // Significant clear-up
+                scale: 1 + intensity * 0.3, // Grow more
+                borderRadius: isNear ? `${50 - intensity * 20}% ${50 + intensity * 20}% ${40 + intensity * 10}% ${60 - intensity * 10}%` : '50%', // Distort shape
+                duration: 0.8,
+                ease: 'power2.out',
+                overwrite: 'auto'
+            });
+
+            // Plus Overlay Interactivity
+            if (plusOverlay.style.opacity > 0) {
+                const moveX = (mouseX - window.innerWidth / 2) * 0.05;
+                const moveY = (mouseY - window.innerHeight / 2) * 0.05;
+                gsap.to('#plusOverlay', {
+                    backgroundPosition: `${50 + moveX/10}% ${50 + moveY/10}%`,
+                    duration: 1,
+                    ease: 'power2.out'
+                });
+            }
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Hero Animations
+        gsap.to('#letterA', {
+            y: -100,
+            opacity: 0,
+            duration: 1.5,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: '#hero',
+                start: 'top top',
+                end: '+=500',
+                scrub: true
+            }
+        });
+
+        gsap.to('#letterC', {
+            y: 100,
+            opacity: 0,
+            duration: 1.5,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: '#hero',
+                start: 'top top',
+                end: '+=500',
+                scrub: true
+            }
+        });
+
+        // Ball movement timeline
+        const ballTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: '#scrollSection',
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 1.5,
+            }
+        });
+
+        // 1. Move to Right, Intermediate Text Appears
+        ballTl.to('#orbContainer', {
+            x: () => window.innerWidth * 0.35,
+            scale: 1.2,
+            duration: 1.5
+        });
+        
+        ballTl.to('#intermediateText', {
+            opacity: 1,
+            y: 0,
+            duration: 0.8
+        }, '<0.3');
+
+        // 2. Keep original colors and move Left
+        ballTl.to('#orbContainer', {
+            x: () => -window.innerWidth * 0.35,
+            scale: 0.8,
+            duration: 2
+        }, '+=1');
+
+        ballTl.to('#intermediateText', {
+            opacity: 0,
+            y: -50,
+            duration: 0.8
+        }, '<');
+
+        // 3. Center and fade out for Awards
+        ballTl.to('#orbContainer', {
+            x: 0,
+            scale: 0,
+            opacity: 0,
+            duration: 1.5,
+            ease: 'power2.inOut'
+        }, '+=0.5');
+
+        // Cards animation - Staggered reveal in grid
+        gsap.utils.toArray('#cardsContainer .card').forEach((card, i) => {
+            gsap.from(card, {
+                y: 150,
+                opacity: 0,
+                scale: 0.95,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 90%',
+                    toggleActions: 'play none none reverse'
+                }
+            });
+        });
+
+        // Firmly hide ball in Awards and Logos sections
+        gsap.to('#orbContainer', {
+            autoAlpha: 0,
+            display: 'none',
+            scrollTrigger: {
+                trigger: '.awards-section',
+                start: 'top 80%',
+                toggleActions: 'play none none reverse'
+            }
+        });
+
+        // Awards Section Animation (Text Reveal)
+        gsap.fromTo('.award-item', 
+            { y: 50, opacity: 0 },
+            { 
+                y: 0, 
+                opacity: 1, 
+                stagger: 0.1, 
+                duration: 1, 
+                ease: 'power4.out',
+                scrollTrigger: {
+                    trigger: '.awards-section',
+                    start: 'top 85%',
+                    toggleActions: 'play none none reverse'
+                }
+            }
+        );
+
+        // Trusted Section - Improved Trigger
+        gsap.fromTo('#logosContainer .logo-item', 
+            { y: 50, opacity: 0 },
+            {
+                y: 0,
+                opacity: 1,
+                stagger: 0.05,
+                duration: 0.8,
+                ease: 'power2.out',
+                scrollTrigger: {
+                    trigger: '#trustedSection',
+                    start: 'top 90%', 
+                    toggleActions: 'play none none reverse'
+                }
+            }
+        );
+
+        // Final Section
+        gsap.to('#orbContainer', {
+            scale: 0,
+            opacity: 0,
+            scrollTrigger: {
+                trigger: '#finalSection',
+                start: 'top center',
+                toggleActions: 'play none none none'
+            }
+        });
+
+        gsap.from('#plusIcon', {
+            scale: 0,
+            rotation: 45,
+            duration: 1.5,
+            ease: 'back.out(1.7)',
+            scrollTrigger: {
+                trigger: '#finalSection',
+                start: 'center center',
+                toggleActions: 'play none none none'
+            }
+        });
+        // Overlay animation: big rotating plus taking over screen
+        const plusTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: '#finalSection',
+                start: 'top 80%',
+                end: 'bottom top',
+                scrub: 1.5
+            }
+        });
+
+        // Phase 1: Appear matching the initial icon
+        plusTl.fromTo('#plusOverlay', 
+            { scale: 0.6, opacity: 0 }, 
+            { opacity: 1, duration: 0.5 }
+        );
+
+        // Phase 2: Rotate while stationary
+        plusTl.to('#overlaySvg', {
+            rotation: 360,
+            duration: 1,
+            ease: 'none'
+        });
+
+        // Phase 3: Take over screen (Zoom & Rotate further)
+        plusTl.to('#plusOverlay', {
+            scale: 45,
+            background: 'radial-gradient(circle at 20% 20%, #ffcc00 0%, transparent 50%), radial-gradient(circle at 80% 20%, #ff6600 0%, transparent 50%), radial-gradient(circle at 20% 80%, #331100 0%, transparent 50%), radial-gradient(circle at 80% 80%, #000000 0%, transparent 50%), #ff6600',
+            duration: 1.5,
+            ease: 'power2.in'
+        }, '+=0.2');
+
+        plusTl.to('#overlaySvg', {
+            rotation: 1800, // Even more rotation for cinematic feel
+            duration: 1.5,
+            ease: 'power2.in'
+        }, '<');
+
+        plusTl.fromTo('.overlay-text',
+            { opacity: 0, scale: 0.1 },
+            { opacity: 1, scale: 0.022, ease: 'power2.out' }, 
+            '>-0.5'
+        );
+
+        gsap.from('.final-main-text', {
+            y: 50,
+            opacity: 0,
+            duration: 1,
+            delay: 0.3,
+            scrollTrigger: {
+                trigger: '#finalSection',
+                start: 'center center',
+                toggleActions: 'play none none none'
+            }
+        });
+
+        gsap.from('.final-sub-text', {
+            y: 30,
+            opacity: 0,
+            duration: 1,
+            delay: 0.6,
+            scrollTrigger: {
+                trigger: '#finalSection',
+                start: 'center center',
+                toggleActions: 'play none none none'
+            }
+        });
+    </script>
+</body>
+
+</html>
