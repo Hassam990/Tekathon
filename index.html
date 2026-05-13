@@ -103,9 +103,10 @@
                         #8b5cf6;
             animation: rotateOrb 20s linear infinite, liquidBlob 12s ease-in-out infinite;
             position: relative;
-            filter: blur(20px); /* Even softer */
-            box-shadow: 0 0 100px 30px rgba(139, 92, 246, 0.2);
-            opacity: 0.8;
+            filter: blur(25px); /* Soft base blur */
+            box-shadow: 0 0 100px 30px rgba(139, 92, 246, 0.1);
+            opacity: 0.9;
+            transition: filter 0.4s ease, transform 0.4s ease;
         }
 
         @keyframes liquidBlob {
@@ -352,7 +353,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            overflow: hidden;
+            overflow: visible; /* Changed from hidden to support pinning */
             padding: 50px;
         }
 
@@ -396,11 +397,16 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          background-color: #ff6600; /* Start solid orange */
-          z-index: 2000;
+          z-index: 9999; /* Maximum priority */
           opacity: 0;
           pointer-events: none;
-          transition: background-color 0.5s ease;
+        }
+        .overlay-bg {
+          position: absolute;
+          inset: 0;
+          background-color: #ff6600;
+          opacity: 0;
+          z-index: -1;
         }
         .plus-overlay svg {
           width: 200px;
@@ -413,6 +419,10 @@
           font-size: 2rem;
           text-align: center;
           max-width: 80%;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 10;
         }
 
         .small-plus {
@@ -576,18 +586,11 @@
                 </defs>
             </svg>
         </div>
-        <div class="final-text-content">
-            <div class="final-main-text">
-                WHERE DIFFERED IS THE STANDARD
-            </div>
-            <div class="final-sub-text">
-                Let's create something extraordinary
-            </div>
-        </div>
     </section>
 <div class="plus-overlay" id="plusOverlay">
+  <div class="overlay-bg" id="overlayBg"></div>
   <svg viewBox="0 0 162 162" fill="none" xmlns="http://www.w3.org/2000/svg" id="overlaySvg">
-    <path d="M108 88.7c-10.8 0-19.7 8.8-19.7 19.7v47.4c0 1.9-1.5 3.4-3.4 3.4h-8.6c-1.9 0-3.4-1.5-3.4-3.4v-47.4c0-10.8-8.8-19.7-19.7-19.7H6.4c-1.9 0-3.4-1.5-3.4-3.4v-8c0-1.9 1.5-3.4 3.4-3.4h46.9c10.8 0 19.7-8.8 19.6-19.7V6.4c0-1.9 1.5-3.4 3.4-3.4H85c1.9 0 3.4 1.5 3.4 3.4v47.8c0 10.8 8.8 19.7 19.7 19.7h46.6c1.9 0 3.4 1.5 3.4 3.4v8c0 1.9-1.5 3.4-3.4 3.4H108z" fill="url(#gradientOverlay)" />
+    <path id="overlayPath" d="M108 88.7c-10.8 0-19.7 8.8-19.7 19.7v47.4c0 1.9-1.5 3.4-3.4 3.4h-8.6c-1.9 0-3.4-1.5-3.4-3.4v-47.4c0-10.8-8.8-19.7-19.7-19.7H6.4c-1.9 0-3.4-1.5-3.4-3.4v-8c0-1.9 1.5-3.4 3.4-3.4h46.9c10.8 0 19.7-8.8 19.6-19.7V6.4c0-1.9 1.5-3.4 3.4-3.4H85c1.9 0 3.4 1.5 3.4 3.4v47.8c0 10.8 8.8 19.7 19.7 19.7h46.6c1.9 0 3.4 1.5 3.4 3.4v8c0 1.9-1.5 3.4-3.4 3.4H108z" fill="#ff6600" />
     <defs>
       <linearGradient id="gradientOverlay" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="#ff6600"/>
@@ -636,11 +639,11 @@
             gsap.to('#orb', {
                 x: orbMoveX,
                 y: orbMoveY,
-                filter: `blur(${20 - intensity * 18}px)`, // Significant clear-up
-                scale: 1 + intensity * 0.3, // Grow more
-                borderRadius: isNear ? `${50 - intensity * 20}% ${50 + intensity * 20}% ${40 + intensity * 10}% ${60 - intensity * 10}%` : '50%', // Distort shape
-                duration: 0.8,
-                ease: 'power2.out',
+                filter: isNear ? `blur(0px)` : `blur(25px)`, // Crystal clear on hover
+                scale: 1 + intensity * 0.4, // More growth
+                borderRadius: isNear ? `${50 - intensity * 30}% ${50 + intensity * 30}% ${40 + intensity * 20}% ${60 - intensity * 20}%` : '50%', // More fluid distortion
+                duration: 0.6,
+                ease: 'elastic.out(1, 0.3)', // Elastic/Fluid feel
                 overwrite: 'auto'
             });
 
@@ -817,44 +820,63 @@
         const plusTl = gsap.timeline({
             scrollTrigger: {
                 trigger: '#finalSection',
-                start: 'top 80%',
-                end: 'bottom top',
-                scrub: 1.5
+                start: 'top top', // Pin when it hits the top
+                end: '+=3000', // Give it 3000px of scroll room
+                scrub: 1.5,
+                pin: true, // PIN the section
+                anticipatePin: 1
             }
         });
 
-        // Phase 1: Appear matching the initial icon
+        // Phase 1: Plus appears from top (Sliding Down)
         plusTl.fromTo('#plusOverlay', 
-            { scale: 0.6, opacity: 0 }, 
-            { opacity: 1, duration: 0.5 }
+            { opacity: 0 }, 
+            { opacity: 1, duration: 0.1 }
         );
 
-        // Phase 2: Rotate while stationary
+        plusTl.fromTo('#overlaySvg',
+            { y: -window.innerHeight, scale: 0.5, rotation: -180 },
+            { y: 0, scale: 1.8, rotation: 0, duration: 1.2, ease: 'power2.out' }
+        );
+
+        // Phase 2: Further rotation while stationary in center
         plusTl.to('#overlaySvg', {
-            rotation: 360,
+            rotation: 720,
             duration: 1,
             ease: 'none'
         });
 
-        // Phase 3: Take over screen (Zoom & Rotate further)
-        plusTl.to('#plusOverlay', {
-            scale: 45,
-            background: 'radial-gradient(circle at 20% 20%, #ffcc00 0%, transparent 50%), radial-gradient(circle at 80% 20%, #ff6600 0%, transparent 50%), radial-gradient(circle at 20% 80%, #331100 0%, transparent 50%), radial-gradient(circle at 80% 80%, #000000 0%, transparent 50%), #ff6600',
-            duration: 1.5,
-            ease: 'power2.in'
+        // Phase 3: Text appears ABOVE the Plus icon first
+        plusTl.fromTo('.overlay-text',
+            { opacity: 0, y: -100 }, // Relative to its center position
+            { 
+                opacity: 1, 
+                y: -180, // Moved above the icon
+                duration: 0.8,
+                ease: 'power2.out' 
+            }
+        );
+
+        // Phase 4: Orange Background Takeover starts AFTER text appears
+        plusTl.to('#overlayBg', {
+            opacity: 1, 
+            duration: 0.8,
+            ease: 'power2.inOut'
         }, '+=0.2');
 
         plusTl.to('#overlaySvg', {
-            rotation: 1800, // Even more rotation for cinematic feel
+            scale: 120, // Even bigger zoom
+            rotation: 1440,
             duration: 1.5,
-            ease: 'power2.in'
+            ease: 'power3.in'
         }, '<');
 
-        plusTl.fromTo('.overlay-text',
-            { opacity: 0, scale: 0.1 },
-            { opacity: 1, scale: 0.022, ease: 'power2.out' }, 
-            '>-0.5'
-        );
+        // Phase 5: Center the text as the background fills
+        plusTl.to('.overlay-text', {
+            y: 0,
+            duration: 1,
+            ease: 'power2.inOut'
+        }, '<0.2');
 
         gsap.from('.final-main-text', {
             y: 50,
